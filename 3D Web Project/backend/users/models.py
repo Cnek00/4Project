@@ -1,12 +1,18 @@
 from django.contrib.auth.models import AbstractUser
-from django.db import models
+from models import models
 
 
 class User(AbstractUser):
+    # Google'dan gelmeyen ama bize lazım olan ek bilgiler
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    profile_picture = models.URLField(blank=True, null=True)  # Google profil fotosu linki için
+
+    # Email'i login alanı yapalım (Google ile uyum için)
     email = models.EmailField(unique=True)
 
-    # İleride buraya telefon no, avatar vb. ekleyebiliriz.
-    # Şimdilik AbstractUser'dan gelen (username, password, first_name, last_name) yetiyor.
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.username
+        return self.email

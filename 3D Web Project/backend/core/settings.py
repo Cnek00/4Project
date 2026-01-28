@@ -32,33 +32,71 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Django Çekirdek Modülleri
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 3. Parti Kütüphaneler
-    'rest_framework',
-    'corsheaders',
+    'django.contrib.sites',
 
-    # Bizim App'ler
+    # 3. Parti Kütüphaneler (Auth & API)
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
+    'dj_rest_auth',
+    'dj_rest_auth.registration',
+
+    # Senin Uygulamaların
     'users',
     'store',
 ]
 
+SITE_ID = 1
+
+# --- Auth & "Beni Hatırla" Yapılandırması ---
+REST_AUTH = {
+    'USE_JWT': True,
+    'JWT_AUTH_COOKIE': 'my-app-auth',
+    'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
+    'JWT_AUTH_HTTPONLY': True,
+}
+
+# 30 Günlük Oturum Süresi
+ACCOUNT_SESSION_REMEMBER = True
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
+
+# Email Odaklı Giriş Ayarları
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'none' # Geliştirme aşamasında kolaylık sağlar
+
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware', # adada
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Google Allauth için gereken kritik satır burası:
+    'allauth.account.middleware.AccountMiddleware',
+
 ]
 
 ROOT_URLCONF = 'core.urls'
+
+
 
 TEMPLATES = [
     {
@@ -81,13 +119,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+from decouple import config, Csv
+
+# core/settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',  # Bu satır Django'ya "Postgres kullanıyorsun" der.
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
     }
 }
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5173",
@@ -117,7 +161,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Kullanıcıyı 30 gün boyunca hatırla
+ACCOUNT_SESSION_REMEMBER = True
+SESSION_COOKIE_AGE = 2592000 # 30 gün (saniye)
 
+# Sosyal hesapla giriş yapıldığında otomatik kayıt ve giriş
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 

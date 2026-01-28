@@ -15,8 +15,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-]
+    path('api/store/', include('store.urls')), # Store API'larını buraya bağladık
+# Auth yolları
+    path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
+    path('api/auth/social/', include('allauth.socialaccount.urls')), # Google için
+    path('accounts/', include('allauth.urls')), # Bu satır google login yollarını otomatik ekler
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Medya dosyalarını (resimleri) görebilmek için geliştirme modunda ekliyoruz
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

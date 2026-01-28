@@ -1,15 +1,23 @@
-from rest_framework import generics
-from .models import Product
+from rest_framework import generics, serializers
+from .models import Product, Category
 from .serializers import ProductListSerializer
 
-# İsmin tam olarak bu olduğundan emin ol: ProductListView
+# 500 HATASINI ÖNLEYEN SERIALIZER
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = '__all__' # Modelindeki tüm alanları paketle
+
+# VIEWLAR
 class ProductListView(generics.ListAPIView):
+    queryset = Product.objects.all()
     serializer_class = ProductListSerializer
 
-    def get_queryset(self):
-        # Filtreleme mantığı: Görünür, mevcut ve en az 1 bedeni stokta olanlar
-        return Product.objects.filter(
-            is_visible=True,
-            is_available=True,
-            sizes__stock__gt=0
-        ).distinct()
+class CategoryListView(generics.ListAPIView):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+
+class ProductDetailView(generics.RetrieveAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductListSerializer
+    lookup_field = 'id'

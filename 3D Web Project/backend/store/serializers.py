@@ -16,5 +16,5 @@ class ProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = [
             'id', 'slug', 'name_tr', 'name_en', 'price', 'currency',
-            'thumbnail', 'view_count', 'favorite_count', 'sizes'
+            'thumbnail', 'view_count', 'favorite_count', 'sizes','category'
         ]

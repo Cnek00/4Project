@@ -133,11 +133,9 @@ DATABASES = {
     }
 }
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
     "http://localhost:5173",
-    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
@@ -185,3 +183,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = 'users.User'
+
+# Giriş yaptıktan sonra yönlendirilecek adres (Frontend adresi)
+LOGIN_REDIRECT_URL = 'http://localhost:5173'
+
+# Çıkış yaptıktan sonra yönlendirilecek adres
+LOGOUT_REDIRECT_URL = 'http://localhost:5173'
+
+# Eğer allauth profil sayfasına gitmeye zorlarsa bunu kapatıyoruz
+ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'

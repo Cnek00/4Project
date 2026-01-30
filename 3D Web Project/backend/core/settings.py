@@ -118,6 +118,30 @@ MIDDLEWARE = [
 
 ]
 
+AUTHENTICATION_BACKENDS = [
+    # Django'nun kendi admin girişi için
+    'django.contrib.auth.backends.ModelBackend',
+    # Allauth ile sosyal girişler için
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+# Sosyal hesap ayarları (Hatanın detayı için ekliyoruz)
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}
+
+# Çakışmaları önlemek için ek ayarlar
+SOCIALACCOUNT_AUTO_SIGNUP = True  # Kullanıcı yoksa otomatik oluştur
+SOCIALACCOUNT_LOGIN_ON_GET = True # Ara onay sayfasını atla (isteğe bağlı)
+
 ROOT_URLCONF = 'core.urls'
 
 
@@ -222,3 +246,21 @@ DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
 # Geliştirme aşamasında her yerden erişime izin ver
 ALLOWED_HOSTS = ['*']
+
+SOCIALACCOUNT_STORE_TOKENS = True
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}

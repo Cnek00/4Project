@@ -23,3 +23,21 @@ class ProductListSerializer(serializers.ModelSerializer):
             'id', 'slug', 'name_tr', 'name_en', 'price', 'currency',
             'thumbnail', 'view_count', 'favorite_count', 'sizes', 'colors', 'category'
         ]
+
+class CartItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.ReadOnlyField(source='product.name_en')
+    size_value = serializers.ReadOnlyField(source='size.size_value')
+    current_price = serializers.ReadOnlyField(source='size.current_price')
+    total_item_price = serializers.ReadOnlyField()
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'product_name', 'size', 'size_value', 'color', 'quantity', 'current_price', 'total_item_price']
+
+class CartSerializer(serializers.ModelSerializer):
+    items = CartItemSerializer(many=True, read_only=True)
+    total_price = serializers.ReadOnlyField()
+
+    class Meta:
+        model = Cart
+        fields = ['id', 'user', 'items', 'total_price', 'updated_at']

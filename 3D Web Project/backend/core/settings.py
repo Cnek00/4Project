@@ -41,10 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
-    # 3. Parti Kütüphaneler (Auth & API)
-    'rest_framework',
-    'rest_framework.authtoken',
-    'corsheaders',
+# Senin Uygulamaların
+    'users',
+    'store',
+
+
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -52,9 +53,12 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
 
-    # Senin Uygulamaların
-    'users',
-    'store',
+    # 3. Parti Kütüphaneler (Auth & API)
+    'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
+
+
 ]
 
 SITE_ID = 1

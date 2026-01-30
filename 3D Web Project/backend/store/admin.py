@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from .models import Category, Product, ProductColor, ProductSize, Review
+from .models import Category, Product, ProductColor, ProductSize, Review, Cart, CartItem
+
 
 # --- AKSİYON: Toplu Fiyat Güncelleme ---
 @admin.action(description='Seçili bedenlere toplu fiyat ata')
@@ -47,3 +48,12 @@ class ProductSizeAdmin(admin.ModelAdmin):
 admin.site.register(Category)
 admin.site.register(Review)
 admin.site.register(ProductColor)
+
+class CartItemInline(admin.TabularInline):
+    model = CartItem
+    extra = 0
+
+@admin.register(Cart)
+class CartAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'total_price', 'updated_at', 'is_completed')
+    inlines = [CartItemInline]

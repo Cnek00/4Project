@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -21,10 +22,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-of4wn11wb#e@f*^@(q_!n%a+vjdaw%i8j$l!cy1v-o(nap@c-y'
+# Ortam değişkeninden oku; yoksa (sadece geliştirme için) yedek değer kullan.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-of4wn11wb#e@f*^@(q_!n%a+vjdaw%i8j$l!cy1v-o(nap@c-y',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Production'da DEBUG=False olacak şekilde ortam değişkeni kullan (örn. DEBUG=0 veya atama yok).
+DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
 
 ALLOWED_HOSTS = []
 
@@ -69,6 +75,20 @@ REST_AUTH = {
     'JWT_AUTH_COOKIE': 'my-app-auth',
     'JWT_AUTH_REFRESH_COOKIE': 'my-refresh-token',
     'JWT_AUTH_HTTPONLY': True,
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 }
 
 # 30 Günlük Oturum Süresi
@@ -188,12 +208,17 @@ STATIC_URL = 'static/'
 
 AUTH_USER_MODEL = 'users.User'
 
-# Giriş yaptıktan sonra yönlendirilecek adres (Frontend adresi)
-LOGIN_REDIRECT_URL = 'http://localhost:5173'
-
-# Çıkış yaptıktan sonra yönlendirilecek adres
-LOGOUT_REDIRECT_URL = 'http://localhost:5173'
+# Google Allauth: Giriş sonrası önce JWT üretilir, sonra frontend'e yönlendirilir
+LOGIN_REDIRECT_URL = '/api/auth/google-jwt-redirect/'
+# Frontend'de token'ların yazılacağı sayfa (hash ile access & refresh alır)
+FRONTEND_AUTH_CALLBACK_URL = os.environ.get('FRONTEND_AUTH_CALLBACK_URL', 'http://localhost:5173/auth/callback')
+# Çıkış sonrası frontend ana sayfa
+LOGOUT_REDIRECT_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # Eğer allauth profil sayfasına gitmeye zorlarsa bunu kapatıyoruz
 ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
+
+# Geliştirme aşamasında her yerden erişime izin ver
+ALLOWED_HOSTS = ['*']

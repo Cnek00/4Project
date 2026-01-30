@@ -1,13 +1,16 @@
 import { Link } from 'react-router-dom';
+import { mediaUrl } from '../services/api';
 
 export default function ProductCard({ product }) {
+  const imageSrc = product.thumbnail || product.images?.[0]?.image;
+  const src = imageSrc ? mediaUrl(imageSrc) : null;
+
   return (
     <div className="border p-4 rounded-xl bg-white hover:shadow-lg transition flex flex-col h-full">
-      {/* Ürün Görseli (Thumbnail) */}
       <div className="h-48 bg-gray-100 rounded-lg mb-4 overflow-hidden flex items-center justify-center">
-        {product.thumbnail ? (
+        {src ? (
           <img
-            src={product.thumbnail}
+            src={src}
             alt={product.name_tr}
             className="object-cover w-full h-full hover:scale-105 transition duration-300"
           />

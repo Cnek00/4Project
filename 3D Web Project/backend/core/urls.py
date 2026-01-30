@@ -18,17 +18,23 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from .views import google_jwt_redirect
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/store/', include('store.urls')), # Store API'larını buraya bağladık
-# Auth yolları
+    path('api/store/', include('store.urls')),
+    # JWT Auth
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # Google Allauth girişinden sonra JWT üretir ve frontend'e yönlendirir
+    path('api/auth/google-jwt-redirect/', google_jwt_redirect, name='google_jwt_redirect'),
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
-    path('api/auth/social/', include('allauth.socialaccount.urls')), # Google için
-    path('accounts/', include('allauth.urls')), # Bu satır google login yollarını otomatik ekler
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('api/auth/social/', include('allauth.socialaccount.urls')),
+    path('accounts/', include('allauth.urls')),
+]
 
-# Medya dosyalarını (resimleri) görebilmek için geliştirme modunda ekliyoruz
+# Geliştirme aşamasında medya (resim) dosyalarının servis edilmesi
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

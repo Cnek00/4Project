@@ -1,8 +1,14 @@
 from rest_framework import serializers
-from .models import Product, ProductSize, ProductColor, Cart, CartItem, Category
+from .models import Product, ProductSize, ProductColor, ProductImage, Cart, CartItem, Category, Order, OrderItem
 
 
 # --- ÜRÜN SERIALIZERS ---
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image', 'order']
+
 
 class ProductSizeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,27 +23,28 @@ class ProductColorSerializer(serializers.ModelSerializer):
 class ProductListSerializer(serializers.ModelSerializer):
     sizes = ProductSizeSerializer(many=True, read_only=True)
     colors = ProductColorSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Product
         fields = [
             'id', 'slug', 'name_tr', 'name_en', 'price', 'currency',
-            'thumbnail', 'view_count', 'favorite_count', 'sizes', 'colors', 'category'
+            'thumbnail', 'view_count', 'favorite_count', 'sizes', 'colors', 'images', 'category'
         ]
 
 # --- SEPET SERIALIZERS (SIRALAMA ÖNEMLİ) ---
 
 class CartItemSerializer(serializers.ModelSerializer):
-    # Read-only alanlar frontend'de işimizi kolaylaştırır
     product_name = serializers.ReadOnlyField(source='product.name_en')
     size_value = serializers.ReadOnlyField(source='size.size_value')
     current_price = serializers.ReadOnlyField(source='size.current_price')
     total_item_price = serializers.ReadOnlyField()
+    product_thumbnail = serializers.ImageField(source='product.thumbnail', read_only=True)
 
     class Meta:
         model = CartItem
         fields = [
-            'id', 'product', 'product_name', 'size', 'size_value',
+            'id', 'product', 'product_name', 'product_thumbnail', 'size', 'size_value',
             'color', 'quantity', 'current_price', 'total_item_price'
         ]
 
@@ -55,3 +62,21 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = ['id', 'name_tr', 'name_en', 'slug']
+
+
+# --- SİPARİŞ SERIALIZERS ---
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    line_total = serializers.ReadOnlyField()
+
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product_name', 'size_value', 'price', 'quantity', 'line_total']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'status', 'total', 'items', 'created_at', 'updated_at']

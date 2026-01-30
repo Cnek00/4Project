@@ -80,6 +80,19 @@ class Product(models.Model):
         return self.name_en
 
 
+class ProductImage(models.Model):
+    """Ürün galerisi: Her ürünün birden fazla görseli olabilir."""
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ImageField(upload_to='products/gallery/')
+    order = models.PositiveIntegerField(default=0, help_text='Sıralama (küçük önce)')
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return f"{self.product.name_en} - Görsel #{self.order}"
+
+
 class ProductColor(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='colors')
     name = models.CharField(max_length=50)
@@ -175,6 +188,44 @@ class Cart(models.Model):
             item.quantity += int(quantity)
             item.save()
         return item
+
+
+# --- SİPARİŞ YAPILARI ---
+
+class Order(models.Model):
+    STATUS_CHOICES = (
+        ('pending', 'Beklemede'),
+        ('paid', 'Ödendi'),
+        ('shipped', 'Kargoda'),
+        ('delivered', 'Teslim Edildi'),
+        ('cancelled', 'İptal'),
+    )
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+    coupon = models.ForeignKey(Coupon, on_delete=models.SET_NULL, null=True, blank=True, related_name='orders')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Sipariş #{self.id} - {self.user.email} ({self.status})"
+
+
+class OrderItem(models.Model):
+    """Sipariş kalemi: Fiyat ve beden sipariş anındaki haliyle sabitlenir (geçmiş bozulmaz)."""
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, related_name='order_items')
+    product_name = models.CharField(max_length=200)
+    size_value = models.FloatField(verbose_name="Beden (anlık kopya)")
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Birim fiyat (anlık kopya)")
+    quantity = models.PositiveIntegerField(default=1)
+
+    @property
+    def line_total(self):
+        return self.price * self.quantity
+
+    def __str__(self):
+        return f"{self.product_name} (No: {self.size_value}) x {self.quantity}"
 
 
 # --- ETKİLEŞİM MODELLERİ ---

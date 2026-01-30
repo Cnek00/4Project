@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from .models import Category, Product, ProductColor, ProductSize, Review, Cart, CartItem
+from .models import Category, Product, ProductColor, ProductSize, ProductImage, Review, Cart, CartItem, Order, OrderItem
 
 
 # --- AKSİYON: Toplu Fiyat Güncelleme ---
@@ -27,11 +27,18 @@ class ProductColorInline(admin.TabularInline):
     fields = ('name', 'hex_code')
     extra = 1
 
+
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    fields = ('image', 'order')
+    extra = 1
+
+
 # --- MODEL KAYITLARI ---
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name_en', 'price', 'category', 'is_visible')
-    inlines = [ProductSizeInline, ProductColorInline]
+    inlines = [ProductSizeInline, ProductColorInline, ProductImageInline]
     prepopulated_fields = {"slug": ("name_en",)}
 
 @admin.register(ProductSize)
@@ -57,3 +64,17 @@ class CartItemInline(admin.TabularInline):
 class CartAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'total_price', 'updated_at', 'is_completed')
     inlines = [CartItemInline]
+
+
+class OrderItemInline(admin.TabularInline):
+    model = OrderItem
+    extra = 0
+    readonly_fields = ('product_name', 'size_value', 'price', 'quantity')
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('id', 'user', 'status', 'total', 'created_at')
+    list_filter = ('status',)
+    inlines = [OrderItemInline]
+    readonly_fields = ('created_at', 'updated_at')

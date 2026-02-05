@@ -2,6 +2,7 @@ import axios from 'axios';
 
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 const API_URL = `${API_BASE}/api`;
+const getLang = () => localStorage.getItem('site_lang') || 'tr';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -11,6 +12,9 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const access = localStorage.getItem('access');
   if (access) config.headers.Authorization = `Bearer ${access}`;
+  if (!config.headers['Accept-Language']) {
+    config.headers['Accept-Language'] = getLang();
+  }
   return config;
 });
 
@@ -68,13 +72,20 @@ export const getMyCart = () =>
   api.get(`${store}/cart/my_cart/`).then((res) => res.data);
 
 export const addToCart = (productId, sizeId, quantity = 1) =>
-  api.post(`${store}/cart/add_to_cart/`, { product_id: productId, size_id: sizeId, quantity }).then((res) => res.data);
+  api
+    .post(`${store}/cart/add_to_cart/`, { product_id: productId, size_id: sizeId, quantity })
+    .then((res) => res.data);
+
+export const addToCartWithColor = (productId, sizeId, colorId, quantity = 1) =>
+  api
+    .post(`${store}/cart/add_to_cart/`, { product_id: productId, size_id: sizeId, color_id: colorId, quantity })
+    .then((res) => res.data);
 
 export const updateCartItemQuantity = (itemId, quantity) =>
-  api.patch(`${store}/cart/${itemId}/update_quantity/`, { quantity }).then((res) => res.data);
+  api.patch(`${store}/cart/items/${itemId}/quantity/`, { quantity }).then((res) => res.data);
 
 export const removeCartItem = (itemId) =>
-  api.delete(`${store}/cart/${itemId}/remove_item/`).then((res) => res.data);
+  api.delete(`${store}/cart/items/${itemId}/`).then((res) => res.data);
 
 export const applyCoupon = (code) =>
   api.post(`${store}/cart/apply_coupon/`, { code }).then((res) => res.data);

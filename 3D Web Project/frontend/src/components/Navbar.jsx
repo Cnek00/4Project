@@ -1,14 +1,25 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Store, LogIn, LogOut, Package } from 'lucide-react';
+import { ShoppingCart, Store, LogIn, LogOut, Package, Sun, Moon, Languages } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { useState } from 'react';
 
 export default function Navbar() {
   const { isAuthenticated, logout, cartCount } = useAuth();
+  const { theme, toggleTheme } = useTheme();
+  const [lang, setLang] = useState(localStorage.getItem('site_lang') || 'tr');
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const toggleLang = () => {
+    const next = lang === 'tr' ? 'en' : 'tr';
+    localStorage.setItem('site_lang', next);
+    setLang(next);
+    window.dispatchEvent(new Event('language-change'));
   };
 
   return (
@@ -19,7 +30,25 @@ export default function Navbar() {
           <span className="text-xl font-black tracking-tighter text-gray-900">3D-SHOP</span>
         </Link>
 
-        <div className="flex items-center gap-6 sm:gap-8 text-sm font-semibold text-gray-600">
+        <div className="flex items-center gap-4 sm:gap-6 text-sm font-semibold text-gray-600">
+          <button
+            type="button"
+            onClick={toggleLang}
+            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 transition text-gray-700"
+            title="Dil Değiştir"
+          >
+            <Languages className="w-4 h-4" />
+            {lang.toUpperCase()}
+          </button>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 transition text-gray-700"
+            title="Tema Değiştir"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            {theme === 'dark' ? 'Açık' : 'Koyu'}
+          </button>
           <Link to="/" className="hover:text-indigo-600 flex items-center gap-1">
             <Store className="w-4 h-4" /> Mağaza
           </Link>

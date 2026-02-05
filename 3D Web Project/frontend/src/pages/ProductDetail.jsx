@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getProductDetail, addToCart, mediaUrl } from '../services/api';
+import { getProductDetail, addToCartWithColor, addToCart, mediaUrl } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { ShoppingCart, CheckCircle, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, CheckCircle, ArrowLeft, Eye, Box } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function ProductDetail() {
@@ -14,14 +14,26 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [selectedColorId, setSelectedColorId] = useState(null);
+  const [show3d, setShow3d] = useState(false);
 
-  useEffect(() => {
+  const loadProduct = () => {
     getProductDetail(id)
       .then((data) => {
         setProduct(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProduct();
+  }, [id]);
+
+  useEffect(() => {
+    const onLang = () => loadProduct();
+    window.addEventListener('language-change', onLang);
+    return () => window.removeEventListener('language-change', onLang);
   }, [id]);
 
   if (loading) return <div className="text-center py-20 font-bold">Yükleniyor...</div>;
@@ -33,6 +45,10 @@ export default function ProductDetail() {
       ? [mediaUrl(product.thumbnail)]
       : [];
   const mainImage = images[galleryIndex] || images[0];
+  const modelUrl = product.model_3d ? mediaUrl(product.model_3d) : null;
+  const posterUrl = product.model_3d_poster ? mediaUrl(product.model_3d_poster) : mainImage;
+  const displayName = product.display_name || product.name_tr || product.name_en;
+  const displayDescription = product.display_description || product.description_tr || product.description_en;
 
   const handleAddToCart = () => {
     if (!selectedSizeId) {
@@ -44,7 +60,10 @@ export default function ProductDetail() {
       return;
     }
     setMessage(null);
-    addToCart(product.id, selectedSizeId, quantity)
+    const request = selectedColorId
+      ? addToCartWithColor(product.id, selectedSizeId, selectedColorId, quantity)
+      : addToCart(product.id, selectedSizeId, quantity);
+    request
       .then(() => {
         setMessage('Ürün sepete eklendi.');
         refreshCartCount?.();
@@ -61,18 +80,56 @@ export default function ProductDetail() {
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-        {/* Sol: Görsel / Galeri */}
         <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShow3d(false)}
+              className={`px-4 py-2 rounded-full text-sm font-semibold border ${
+                !show3d ? 'bg-gray-900 text-white border-gray-900' : 'border-gray-200'
+              }`}
+            >
+              <Eye className="w-4 h-4 inline-block mr-1" />
+              Görseller
+            </button>
+            {modelUrl && (
+              <button
+                type="button"
+                onClick={() => setShow3d(true)}
+                className={`px-4 py-2 rounded-full text-sm font-semibold border ${
+                  show3d ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-200'
+                }`}
+              >
+                <Box className="w-4 h-4 inline-block mr-1" />
+                3D Görünüm
+              </button>
+            )}
+          </div>
+
           <div className="bg-white aspect-square rounded-3xl overflow-hidden shadow-sm border border-gray-100 flex items-center justify-center">
-            {mainImage ? (
+            {!show3d && mainImage ? (
               <img
                 src={mainImage}
-                alt={product.name_tr}
+                alt={displayName}
                 className="w-full h-full object-contain p-6"
               />
-            ) : (
+            ) : null}
+            {!show3d && !mainImage ? (
               <div className="text-gray-300 italic">Görsel mevcut değil.</div>
-            )}
+            ) : null}
+            {show3d && modelUrl ? (
+              <model-viewer
+                src={modelUrl}
+                poster={posterUrl || undefined}
+                camera-controls
+                auto-rotate
+                shadow-intensity="1"
+                style={{ width: '100%', height: '100%' }}
+              />
+            ) : null}
+            {show3d && !modelUrl ? (
+              <div className="text-gray-300 italic">3D model mevcut değil.</div>
+            ) : null}
           </div>
           {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-2">
@@ -92,10 +149,9 @@ export default function ProductDetail() {
           )}
         </div>
 
-        {/* Sağ: Detay */}
         <div className="flex flex-col justify-center">
           <h1 className="text-4xl font-black text-gray-900 mb-2 leading-tight">
-            {product.name_tr}
+            {displayName}
           </h1>
           <p className="text-xl text-gray-400 italic mb-6">{product.name_en}</p>
 
@@ -103,7 +159,36 @@ export default function ProductDetail() {
             {product.price} <span className="text-lg font-medium">{product.currency}</span>
           </div>
 
-          {/* Beden seçimi */}
+          <p className="text-gray-600 leading-relaxed mb-8">
+            {displayDescription}
+          </p>
+
+          {product.colors && product.colors.length > 0 && (
+            <div className="mb-8">
+              <h3 className="font-bold text-gray-700 mb-3">Renk Seçin</h3>
+              <div className="flex flex-wrap gap-2">
+                {product.colors.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedColorId(c.id)}
+                    className={`px-4 py-2 rounded-full border text-sm font-semibold ${
+                      selectedColorId === c.id
+                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-200'
+                    }`}
+                  >
+                    <span
+                      className="inline-block w-3 h-3 rounded-full mr-2 align-middle"
+                      style={{ background: c.hex_code }}
+                    />
+                    {c.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="mb-10">
             <h3 className="font-bold text-gray-700 mb-4">Mevcut Stok / Beden Seçin</h3>
             <div className="flex flex-wrap gap-3">
@@ -133,7 +218,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Miktar */}
           <div className="mb-6">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Miktar</label>
             <input

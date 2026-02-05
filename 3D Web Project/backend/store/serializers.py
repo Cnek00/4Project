@@ -24,13 +24,47 @@ class ProductListSerializer(serializers.ModelSerializer):
     sizes = ProductSizeSerializer(many=True, read_only=True)
     colors = ProductColorSerializer(many=True, read_only=True)
     images = ProductImageSerializer(many=True, read_only=True)
+    display_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = [
             'id', 'slug', 'name_tr', 'name_en', 'price', 'currency',
-            'thumbnail', 'view_count', 'favorite_count', 'sizes', 'colors', 'images', 'category'
+            'thumbnail', 'view_count', 'favorite_count', 'sizes', 'colors', 'images', 'category',
+            'display_name',
         ]
+
+    def get_display_name(self, obj):
+        request = self.context.get('request')
+        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
+        return obj.name_tr if lang.startswith('tr') else obj.name_en
+
+
+class ProductDetailSerializer(serializers.ModelSerializer):
+    sizes = ProductSizeSerializer(many=True, read_only=True)
+    colors = ProductColorSerializer(many=True, read_only=True)
+    images = ProductImageSerializer(many=True, read_only=True)
+    display_name = serializers.SerializerMethodField()
+    display_description = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = [
+            'id', 'slug', 'name_tr', 'name_en', 'description_tr', 'description_en',
+            'price', 'currency', 'thumbnail', 'model_3d', 'model_3d_poster',
+            'view_count', 'favorite_count', 'sizes', 'colors', 'images', 'category',
+            'display_name', 'display_description',
+        ]
+
+    def get_display_name(self, obj):
+        request = self.context.get('request')
+        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
+        return obj.name_tr if lang.startswith('tr') else obj.name_en
+
+    def get_display_description(self, obj):
+        request = self.context.get('request')
+        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
+        return obj.description_tr if lang.startswith('tr') else obj.description_en
 
 # --- SEPET SERIALIZERS (SIRALAMA ÖNEMLİ) ---
 
@@ -56,6 +90,7 @@ class CartSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cart
         fields = ['id', 'user', 'items', 'total_price', 'updated_at', 'is_completed']
+        read_only_fields = ['user', 'is_completed']
 
 
 class CategorySerializer(serializers.ModelSerializer):

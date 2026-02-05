@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from .models import Category, Product, ProductColor, ProductSize, ProductImage, Review, Cart, CartItem, Order, OrderItem
+from .models import Category, Product, ProductColor, ProductSize, ProductImage, Review, Cart, CartItem, Order, OrderItem, Coupon, Campaign
 
 
 # --- AKSİYON: Toplu Fiyat Güncelleme ---
@@ -37,9 +37,14 @@ class ProductImageInline(admin.TabularInline):
 # --- MODEL KAYITLARI ---
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name_en', 'price', 'category', 'is_visible')
+    list_display = ('name_en', 'price', 'category', 'is_visible', 'is_available')
     inlines = [ProductSizeInline, ProductColorInline, ProductImageInline]
     prepopulated_fields = {"slug": ("name_en",)}
+    fields = (
+        'slug', 'name_tr', 'name_en', 'description_tr', 'description_en',
+        'price', 'currency', 'category', 'thumbnail', 'model_3d', 'model_3d_poster',
+        'is_visible', 'is_available', 'low_stock_warning',
+    )
 
 @admin.register(ProductSize)
 class ProductSizeAdmin(admin.ModelAdmin):
@@ -55,6 +60,9 @@ class ProductSizeAdmin(admin.ModelAdmin):
 admin.site.register(Category)
 admin.site.register(Review)
 admin.site.register(ProductColor)
+admin.site.register(Coupon)
+admin.site.register(Campaign)
+admin.site.register(ProductImage)
 
 class CartItemInline(admin.TabularInline):
     model = CartItem

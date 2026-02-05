@@ -30,9 +30,14 @@ SECRET_KEY = os.environ.get(
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Production'da DEBUG=False olacak şekilde ortam değişkeni kullan (örn. DEBUG=0 veya atama yok).
-DEBUG = os.environ.get('DEBUG', 'False').lower() in ('true', '1', 'yes')
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes') #'true' , '1', 'yes'
 
-ALLOWED_HOSTS = []
+# Örn: ALLOWED_HOSTS=example.com,api.example.com
+ALLOWED_HOSTS = (
+    [h for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h]
+    if not DEBUG
+    else ['*']
+)
 
 
 # Application definition
@@ -89,6 +94,8 @@ REST_FRAMEWORK = {
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 12,
 }
 
 # 30 Günlük Oturum Süresi
@@ -100,7 +107,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = 'none' # Geliştirme aşamasında kolaylık sağlar
+ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'optional')
 
 
 MIDDLEWARE = [
@@ -140,7 +147,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 # Çakışmaları önlemek için ek ayarlar
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Kullanıcı yoksa otomatik oluştur
-SOCIALACCOUNT_LOGIN_ON_GET = True # Ara onay sayfasını atla (isteğe bağlı)
+SOCIALACCOUNT_LOGIN_ON_GET = False
 
 ROOT_URLCONF = 'core.urls'
 
@@ -181,9 +188,18 @@ DATABASES = {
     }
 }
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    o for o in os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:5173,http://127.0.0.1:5173',
+    ).split(',')
+    if o
 ]
+CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = (
+    [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+    if not DEBUG
+    else []
+)
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
@@ -242,10 +258,6 @@ LOGOUT_REDIRECT_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 # Eğer allauth profil sayfasına gitmeye zorlarsa bunu kapatıyoruz
 ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
 SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
-
-# Geliştirme aşamasında her yerden erişime izin ver
-ALLOWED_HOSTS = ['*']
 
 SOCIALACCOUNT_STORE_TOKENS = True
 

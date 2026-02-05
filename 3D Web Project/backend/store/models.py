@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from django.core.validators import FileExtensionValidator, MinValueValidator
 
 User = get_user_model()
 
@@ -68,7 +69,18 @@ class Product(models.Model):
     currency = models.CharField(max_length=5, default="EUR")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     thumbnail = models.ImageField(upload_to='products/thumbnails/')
-    model_3d = models.FileField(upload_to='products/models/', null=True, blank=True)
+    model_3d = models.FileField(
+        upload_to='products/models/',
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(['glb', 'gltf', 'usdz'])],
+    )
+    model_3d_poster = models.ImageField(
+        upload_to='products/model_posters/',
+        null=True,
+        blank=True,
+        help_text='3D model için önizleme/poster görseli',
+    )
     is_visible = models.BooleanField(default=True)
     is_available = models.BooleanField(default=True)
     low_stock_warning = models.IntegerField(default=5)
@@ -142,7 +154,7 @@ class CartItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     size = models.ForeignKey(ProductSize, on_delete=models.CASCADE)
     color = models.ForeignKey(ProductColor, on_delete=models.SET_NULL, null=True, blank=True)
-    quantity = models.PositiveIntegerField(default=1)
+    quantity = models.PositiveIntegerField(default=1, validators=[MinValueValidator(1)])
 
     def __str__(self):
         return f"{self.product.name_en} ({self.size.size_value}) x {self.quantity}"
@@ -150,6 +162,14 @@ class CartItem(models.Model):
     @property
     def total_item_price(self):
         return self.size.current_price * self.quantity
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['cart', 'product', 'size', 'color'],
+                name='unique_cart_item',
+            )
+        ]
 
 
 class Cart(models.Model):

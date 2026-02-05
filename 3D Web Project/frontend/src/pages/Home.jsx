@@ -36,6 +36,12 @@ export default function Home() {
     fetchProducts();
   }, [selectedCategory]);
 
+  useEffect(() => {
+    const onLang = () => fetchProducts();
+    window.addEventListener('language-change', onLang);
+    return () => window.removeEventListener('language-change', onLang);
+  }, []);
+
   const handleSearch = (e) => {
     e?.preventDefault();
     fetchProducts();
@@ -52,11 +58,18 @@ export default function Home() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
       <div className="mb-10">
-        <h1 className="text-5xl font-black mb-4 text-gray-900 tracking-tight">Koleksiyonlar</h1>
-        <div className="h-1 w-20 bg-indigo-600 rounded-full" />
+        <div className="card-glass rounded-3xl p-8 md:p-10 border border-gray-100">
+          <p className="text-sm uppercase tracking-[0.3em] text-gray-400 mb-3">3D Collection</p>
+          <h1 className="text-5xl md:text-6xl font-black mb-4 text-gray-900 tracking-tight">
+            Dokunulabilir Gibi 3D Ürün Deneyimi
+          </h1>
+          <p className="text-gray-500 max-w-2xl">
+            Modeli döndür, detayları incele, anında sepete ekle. Yüksek kalite görseller ve 3D önizleme ile
+            alışverişi bir üst seviyeye taşı.
+          </p>
+        </div>
       </div>
 
-      {/* Arama */}
       <form onSubmit={handleSearch} className="mb-8 flex gap-2 flex-wrap">
         <input
           type="search"
@@ -73,7 +86,6 @@ export default function Home() {
         </button>
       </form>
 
-      {/* Kategori butonları */}
       <div className="flex flex-wrap gap-3 mb-12">
         <button
           type="button"
@@ -102,7 +114,6 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Ürün listesi */}
       {products.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {products.map((p) => (

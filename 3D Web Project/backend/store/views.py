@@ -3,10 +3,12 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
+from django.db import transaction
+from django.db.models import F
 
 from .models import Product, Category, Cart, CartItem, ProductSize, Coupon, Order, OrderItem
 from .serializers import (
-    ProductListSerializer, CartSerializer, CategorySerializer,
+    ProductListSerializer, ProductDetailSerializer, CartSerializer, CategorySerializer,
     OrderSerializer,
 )
 
@@ -40,8 +42,14 @@ class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all().select_related('category').prefetch_related(
         'sizes', 'colors', 'images'
     )
-    serializer_class = ProductListSerializer
+    serializer_class = ProductDetailSerializer
     lookup_field = 'id'
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        Product.objects.filter(pk=instance.pk).update(view_count=F('view_count') + 1)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 # --- SEPET (CART) VIEWSET ---
 
@@ -76,17 +84,27 @@ class CartViewSet(viewsets.ModelViewSet):
 
         product_id = request.data.get('product_id')
         size_id = request.data.get('size_id')
-        quantity = int(request.data.get('quantity', 1))
+        color_id = request.data.get('color_id')
+        try:
+            quantity = int(request.data.get('quantity', 1))
+        except (TypeError, ValueError):
+            return Response({"error": "Geçersiz miktar."}, status=400)
+
+        if quantity < 1:
+            return Response({"error": "Miktar en az 1 olmalıdır."}, status=400)
 
         try:
-            product = Product.objects.get(id=product_id)
-            size = ProductSize.objects.get(id=size_id)
+            product = Product.objects.get(id=product_id, is_visible=True, is_available=True)
+            size = ProductSize.objects.get(id=size_id, product=product)
+            color = None
+            if color_id:
+                color = product.colors.get(id=color_id)
 
             if size.stock < quantity:
                 return Response({"error": f"Yetersiz stok. Mevcut: {size.stock}"}, status=400)
 
             cart, _ = Cart.objects.get_or_create(user=request.user, is_completed=False)
-            item = cart.add_item(product=product, size=size, quantity=quantity)
+            item = cart.add_item(product=product, size=size, color=color, quantity=quantity)
 
             return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
         except Exception as e:
@@ -109,26 +127,32 @@ class CartViewSet(viewsets.ModelViewSet):
 
         for item_data in local_items:
             try:
-                product = Product.objects.get(id=item_data['product_id'])
-                size = ProductSize.objects.get(id=item_data['size_id'])
+                product = Product.objects.get(id=item_data['product_id'], is_visible=True, is_available=True)
+                size = ProductSize.objects.get(id=item_data['size_id'], product=product)
+                color = None
+                color_id = item_data.get('color_id')
+                if color_id:
+                    color = product.colors.get(id=color_id)
                 quantity = int(item_data['quantity'])
 
                 if size.stock >= quantity:
-                    cart.add_item(product=product, size=size, quantity=quantity)
+                    cart.add_item(product=product, size=size, color=color, quantity=quantity)
             except:
                 continue
 
         return Response(CartSerializer(cart).data, status=200)
 
-    @action(detail=True, methods=['patch'])
-    def update_quantity(self, request, pk=None):
+    @action(detail=False, methods=['patch'], url_path=r'items/(?P<item_id>\d+)/quantity')
+    def update_quantity(self, request, item_id=None):
         """Sepetteki öğenin miktarını günceller"""
         try:
-            item = CartItem.objects.get(id=pk, cart__user=request.user)
+            item = CartItem.objects.get(id=item_id, cart__user=request.user)
             new_qty = int(request.data.get('quantity'))
 
             if item.size.stock < new_qty:
                 return Response({"error": "Stok yetersiz."}, status=400)
+            if new_qty < 1:
+                return Response({"error": "Miktar en az 1 olmalıdır."}, status=400)
 
             item.quantity = new_qty
             item.save()
@@ -136,11 +160,11 @@ class CartViewSet(viewsets.ModelViewSet):
         except CartItem.DoesNotExist:
             return Response({"error": "Ürün sepette bulunamadı."}, status=404)
 
-    @action(detail=True, methods=['delete'])
-    def remove_item(self, request, pk=None):
+    @action(detail=False, methods=['delete'], url_path=r'items/(?P<item_id>\d+)')
+    def remove_item(self, request, item_id=None):
         """Öğeyi sepetten tamamen siler"""
         try:
-            item = CartItem.objects.get(id=pk, cart__user=request.user)
+            item = CartItem.objects.get(id=item_id, cart__user=request.user)
             cart = item.cart
             item.delete()
             return Response(CartSerializer(cart).data, status=200)
@@ -177,25 +201,42 @@ class CartViewSet(viewsets.ModelViewSet):
         if not cart or not cart.items.exists():
             return Response({"error": "Sepetiniz boş."}, status=400)
 
-        total = cart.total_price
-        order = Order.objects.create(user=request.user, total=total, coupon=cart.coupon, status='pending')
+        with transaction.atomic():
+            # Stok kilitle
+            size_ids = list(cart.items.values_list('size_id', flat=True))
+            sizes = ProductSize.objects.select_for_update().filter(id__in=size_ids).select_related('product')
+            size_map = {s.id: s for s in sizes}
 
-        for item in cart.items.all():
-            OrderItem.objects.create(
-                order=order,
-                product=item.product,
-                product_name=item.product.name_en,
-                size_value=item.size.size_value,
-                price=item.size.current_price,
-                quantity=item.quantity,
-            )
+            for item in cart.items.all():
+                size = size_map.get(item.size_id)
+                if not size:
+                    return Response({"error": "Beden bulunamadı."}, status=400)
+                if not size.product.is_available or not size.product.is_visible:
+                    return Response({"error": "Ürün satışta değil."}, status=400)
+                if size.stock < item.quantity:
+                    return Response({"error": f"Yetersiz stok. Mevcut: {size.stock}"}, status=400)
 
-        if cart.coupon and cart.coupon.is_valid():
-            cart.coupon.used_count += 1
-            cart.coupon.save()
+            total = cart.total_price
+            order = Order.objects.create(user=request.user, total=total, coupon=cart.coupon, status='pending')
 
-        cart.is_completed = True
-        cart.save()
+            for item in cart.items.all():
+                size = size_map[item.size_id]
+                OrderItem.objects.create(
+                    order=order,
+                    product=item.product,
+                    product_name=item.product.name_en,
+                    size_value=size.size_value,
+                    price=size.current_price,
+                    quantity=item.quantity,
+                )
+                ProductSize.objects.filter(id=size.id).update(stock=F('stock') - item.quantity)
+
+            if cart.coupon and cart.coupon.is_valid():
+                cart.coupon.used_count = F('used_count') + 1
+                cart.coupon.save()
+
+            cart.is_completed = True
+            cart.save()
 
         order = Order.objects.prefetch_related('items').get(pk=order.pk)
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)

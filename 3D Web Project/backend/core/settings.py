@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from decouple import config
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,22 +26,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# Ortam değişkeninden oku; yoksa (sadece geliştirme için) yedek değer kullan.
-SECRET_KEY = os.environ.get(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-of4wn11wb#e@f*^@(q_!n%a+vjdaw%i8j$l!cy1v-o(nap@c-y',
-)
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Production'da DEBUG=False olacak şekilde ortam değişkeni kullan (örn. DEBUG=0 veya atama yok).
-DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes') #'true' , '1', 'yes'
+DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Örn: ALLOWED_HOSTS=example.com,api.example.com
-ALLOWED_HOSTS = (
-    [h for h in os.environ.get('ALLOWED_HOSTS', '').split(',') if h]
-    if not DEBUG
-    else ['*']
-)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='').split(',')
 
 
 # Application definition
@@ -107,7 +102,9 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = os.environ.get('ACCOUNT_EMAIL_VERIFICATION', 'optional')
+ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optional')
+ACCOUNT_LOGIN_METHODS = ['email']
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 
 
 MIDDLEWARE = [
@@ -135,6 +132,11 @@ AUTHENTICATION_BACKENDS = [
 # Sosyal hesap ayarları (Hatanın detayı için ekliyoruz)
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID'),
+            'secret': config('GOOGLE_CLIENT_SECRET'),
+            'key': ''
+        },
         'SCOPE': [
             'profile',
             'email',
@@ -174,12 +176,9 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-from decouple import config, Csv
-
-# core/settings.py
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Bu satır Django'ya "Postgres kullanıyorsun" der.
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
@@ -188,15 +187,15 @@ DATABASES = {
     }
 }
 CORS_ALLOWED_ORIGINS = [
-    o for o in os.environ.get(
+    o for o in config(
         'CORS_ALLOWED_ORIGINS',
-        'http://localhost:5173,http://127.0.0.1:5173',
+        default='http://localhost:5173,http://127.0.0.1:5173',
     ).split(',')
     if o
 ]
 CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = (
-    [o for o in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if o]
+    [o for o in config('CSRF_TRUSTED_ORIGINS', default='').split(',') if o]
     if not DEBUG
     else []
 )

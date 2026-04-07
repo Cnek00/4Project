@@ -1,23 +1,28 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext(null);
 
-const getInitialTheme = () => {
+function getInitialTheme() {
   const stored = localStorage.getItem('site_theme');
   if (stored === 'light' || stored === 'dark') return stored;
-  const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-  return prefersDark ? 'dark' : 'light';
-};
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(getInitialTheme);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    document
+      .querySelector('meta[name="theme-color"][media*="light"]')
+      ?.setAttribute('content', theme === 'dark' ? '#050e1a' : '#F6FAFD');
+    document
+      .querySelector('meta[name="theme-color"][media*="dark"]')
+      ?.setAttribute('content', theme === 'dark' ? '#050e1a' : '#F6FAFD');
     localStorage.setItem('site_theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme((t) => (t === 'dark' ? 'light' : 'dark'));
+  const toggleTheme = () => setTheme((current) => (current === 'dark' ? 'light' : 'dark'));
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

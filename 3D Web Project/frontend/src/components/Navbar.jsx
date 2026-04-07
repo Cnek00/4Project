@@ -1,14 +1,38 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Store, LogIn, LogOut, Package, Sun, Moon, Languages } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import {
+  ShoppingCart,
+  Store,
+  LogIn,
+  LogOut,
+  Package,
+  Sun,
+  Moon,
+  Languages,
+  Menu,
+  X,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useState } from 'react';
 
 export default function Navbar() {
   const { isAuthenticated, logout, cartCount } = useAuth();
   const { theme, toggleTheme } = useTheme();
-  const [lang, setLang] = useState(localStorage.getItem('site_lang') || 'tr');
+  const [lang, setLang] = useState(() => localStorage.getItem('site_lang') || 'tr');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -22,67 +46,182 @@ export default function Navbar() {
     window.dispatchEvent(new Event('language-change'));
   };
 
-  return (
-    <nav className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 bg-indigo-600 rounded-lg group-hover:rotate-12 transition-transform" />
-          <span className="text-xl font-black tracking-tighter text-gray-900">3D-SHOP</span>
-        </Link>
+  const activeLink = (path) => location.pathname === path;
 
-        <div className="flex items-center gap-4 sm:gap-6 text-sm font-semibold text-gray-600">
-          <button
-            type="button"
-            onClick={toggleLang}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 transition text-gray-700"
-            title="Dil Değiştir"
-          >
-            <Languages className="w-4 h-4" />
-            {lang.toUpperCase()}
-          </button>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-full border border-gray-200 hover:border-gray-300 transition text-gray-700"
-            title="Tema Değiştir"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            {theme === 'dark' ? 'Açık' : 'Koyu'}
-          </button>
-          <Link to="/" className="hover:text-indigo-600 flex items-center gap-1">
-            <Store className="w-4 h-4" /> Mağaza
+  return (
+    <nav
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled ? 'backdrop-blur-xl bg-white/80 border-b border-slate-200 shadow-sm' : 'bg-transparent'
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-4">
+          <Link to="/" className="flex items-center gap-3 text-lg font-black tracking-tight text-slate-900">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white">3D</span>
+            3D Shop
           </Link>
-          <Link to="/cart" className="hover:text-indigo-600 flex items-center gap-1 relative">
-            <ShoppingCart className="w-4 h-4" /> Sepetim
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-[10px] min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-                {cartCount}
-              </span>
-            )}
-          </Link>
-          {isAuthenticated ? (
-            <>
-              <Link to="/orders" className="hover:text-indigo-600 flex items-center gap-1">
-                <Package className="w-4 h-4" /> Siparişlerim
+
+          <div className="hidden md:flex items-center gap-2 text-sm font-semibold text-slate-600">
+            <Link
+              to="/"
+              className={`px-4 py-2 rounded-full transition ${
+                activeLink('/') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100'
+              }`}
+            >
+              Mağaza
+            </Link>
+            <Link
+              to="/about"
+              className={`px-4 py-2 rounded-full transition ${
+                activeLink('/about') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100'
+              }`}
+            >
+              Hakkında
+            </Link>
+            <Link
+              to="/cart"
+              className={`relative px-4 py-2 rounded-full transition flex items-center gap-2 ${
+                activeLink('/cart') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100'
+              }`}
+            >
+              <ShoppingCart className="w-4 h-4" /> Sepet
+              {cartCount > 0 && (
+                <span className="absolute -right-2 -top-2 inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-red-500 text-[10px] font-black text-white px-1">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/orders"
+                className={`px-4 py-2 rounded-full transition ${
+                  activeLink('/orders') ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100'
+                }`}
+              >
+                Siparişlerim
               </Link>
+            )}
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="hidden xl:inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 hover:border-slate-300 transition"
+            >
+              <Languages className="w-4 h-4" /> {lang.toUpperCase()}
+            </button>
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="hidden xl:inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 hover:border-slate-300 transition"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              {theme === 'dark' ? 'Açık' : 'Koyu'}
+            </button>
+            {isAuthenticated ? (
               <button
                 type="button"
                 onClick={handleLogout}
-                className="flex items-center gap-1 text-gray-600 hover:text-red-600 transition"
+                className="inline-flex items-center gap-2 rounded-full border border-red-100 bg-red-50 px-3 py-2 text-red-700 hover:bg-red-100 transition"
               >
                 <LogOut className="w-4 h-4" /> Çıkış
               </button>
-            </>
-          ) : (
-            <Link
-              to="/login"
-              className="bg-gray-900 text-white px-5 py-2 rounded-full hover:bg-indigo-600 transition flex items-center gap-1"
+            ) : (
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-white hover:bg-indigo-600 transition"
+              >
+                <LogIn className="w-4 h-4" /> Giriş
+              </Link>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2 md:hidden">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-600 hover:border-slate-300 transition"
+              aria-label="Tema değiştir"
             >
-              <LogIn className="w-4 h-4" /> Giriş Yap
-            </Link>
-          )}
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((open) => !open)}
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white p-2 text-slate-600 hover:border-slate-300 transition"
+              aria-label="Mobil menü"
+            >
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="md:hidden border-t border-slate-200 bg-white/95 backdrop-blur-xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3">
+            <Link
+              to="/"
+              className="block rounded-2xl px-4 py-3 text-slate-700 hover:bg-slate-100"
+            >
+              Mağaza
+            </Link>
+            <Link
+              to="/about"
+              className="block rounded-2xl px-4 py-3 text-slate-700 hover:bg-slate-100"
+            >
+              Hakkında
+            </Link>
+            <Link
+              to="/cart"
+              className="block rounded-2xl px-4 py-3 text-slate-700 hover:bg-slate-100"
+            >
+              Sepetim
+            </Link>
+            {isAuthenticated && (
+              <Link
+                to="/orders"
+                className="block rounded-2xl px-4 py-3 text-slate-700 hover:bg-slate-100"
+              >
+                Siparişlerim
+              </Link>
+            )}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={toggleLang}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 hover:border-slate-300"
+              >
+                <Languages className="w-4 h-4" /> {lang.toUpperCase()}
+              </button>
+              <button
+                type="button"
+                onClick={toggleTheme}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-700 hover:border-slate-300"
+              >
+                {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                Tema
+              </button>
+            </div>
+            <div>
+              {isAuthenticated ? (
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-red-700 hover:bg-red-100"
+                >
+                  <LogOut className="w-4 h-4" /> Çıkış
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3 text-white hover:bg-indigo-600"
+                >
+                  <LogIn className="w-4 h-4" /> Giriş
+                </Link>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }

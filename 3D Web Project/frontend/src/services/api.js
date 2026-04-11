@@ -1,8 +1,9 @@
 import axios from 'axios';
+import { getLang as getSiteLang } from '../utils/locale';
 
 export const API_BASE = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
 const API_URL = `${API_BASE}/api`;
-const getLang = () => localStorage.getItem('site_lang') || 'tr';
+const getLang = () => getSiteLang();
 
 const api = axios.create({
   baseURL: API_URL,
@@ -51,6 +52,9 @@ export const setTokens = (access, refresh) => {
   if (access) localStorage.setItem('access', access);
   if (refresh) localStorage.setItem('refresh', refresh);
 };
+
+export const register = (email, password1, password2) =>
+  api.post('/auth/registration/', { email, password1, password2 }).then((res) => res.data);
 
 export const logout = () => {
   localStorage.removeItem('access');

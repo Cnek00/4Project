@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getProductDetail, addToCartWithColor, addToCart, mediaUrl } from '../services/api';
+import { getLang } from '../utils/locale';
 import { useAuth } from '../context/AuthContext';
 import { ShoppingCart, CheckCircle, ArrowLeft, Eye, Box } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -47,8 +48,9 @@ export default function ProductDetail() {
   const mainImage = images[galleryIndex] || images[0];
   const modelUrl = product.model_3d ? mediaUrl(product.model_3d) : null;
   const posterUrl = product.model_3d_poster ? mediaUrl(product.model_3d_poster) : mainImage;
-  const displayName = product.display_name || product.name_tr || product.name_en;
-  const displayDescription = product.display_description || product.description_tr || product.description_en;
+  const lang = getLang();
+  const displayName = product.display_name || (lang === 'tr' ? product.name_tr : product.name_en) || product.name_tr || product.name_en;
+  const displayDescription = product.display_description || (lang === 'tr' ? product.description_tr : product.description_en) || product.description_tr || product.description_en;
 
   const handleAddToCart = () => {
     if (!selectedSizeId) {
@@ -153,7 +155,7 @@ export default function ProductDetail() {
           <h1 className="text-4xl font-black text-gray-900 mb-2 leading-tight">
             {displayName}
           </h1>
-          <p className="text-xl text-gray-400 italic mb-6">{product.name_en}</p>
+          <p className="text-xl text-gray-400 italic mb-6">{lang === 'tr' ? product.name_tr : product.name_en}</p>
 
           <div className="text-3xl font-extrabold text-indigo-600 mb-8 bg-indigo-50 inline-block px-4 py-2 rounded-xl self-start">
             {product.price} <span className="text-lg font-medium">{product.currency}</span>

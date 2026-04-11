@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { getProducts, getCategories } from '../services/api';
+import { getLang } from '../utils/locale';
 import ProductCard, { ProductCardSkeleton } from '../components/ProductCard';
 
 export default function Home() {
@@ -8,6 +9,7 @@ export default function Home() {
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState(getLang());
   const searchRef = useRef(null);
 
   const fetchProducts = useCallback(() => {
@@ -40,7 +42,14 @@ export default function Home() {
   }, [selectedCategory]);
 
   useEffect(() => {
-    const onLanguageChange = () => fetchProducts();
+    const onLanguageChange = () => {
+      setLang(getLang());
+      fetchProducts();
+      getCategories().then((data) => {
+        const list = data?.results ?? data ?? [];
+        setCategories(Array.isArray(list) ? list : []);
+      }).catch(() => setCategories([]));
+    };
     window.addEventListener('language-change', onLanguageChange);
     return () => window.removeEventListener('language-change', onLanguageChange);
   }, [fetchProducts]);
@@ -135,7 +144,7 @@ export default function Home() {
               selectedCategory === category.id ? 'bg-indigo-600 text-white shadow-lg' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
-            {category.name_tr || category.name_en || category.slug}
+            {lang === 'tr' ? category.name_tr || category.name_en : category.name_en || category.name_tr || category.slug}
           </button>
         ))}
       </div>

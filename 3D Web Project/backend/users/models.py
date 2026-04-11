@@ -10,9 +10,18 @@ class User(AbstractUser):
 
     # Email'i login alanı yapalım
     email = models.EmailField(unique=True)
+    
+    # Username nullable yapalım, email'den generate edilecek
+    username = models.CharField(
+        max_length=150, 
+        unique=True, 
+        blank=True,
+        null=True,
+        help_text="Boş bırakılabilir, email'den generate edilir"
+    )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email

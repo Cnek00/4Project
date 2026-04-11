@@ -13,13 +13,13 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const hash = window.location.hash?.slice(1) || '';
-    const params = new URLSearchParams(hash);
+    const search = window.location.search?.slice(1) || '';
+    const params = new URLSearchParams(hash || search);
     const access = params.get('access');
     const refresh = params.get('refresh');
 
     if (access) {
       loginWithTokens(access, refresh);
-      // Hash'i temizleyerek URL'den token'ları kaldır
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
     navigate('/', { replace: true });

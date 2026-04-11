@@ -19,7 +19,11 @@ export default function Login() {
       await login(email, password);
       navigate('/', { replace: true });
     } catch (err) {
-      setError(err.response?.data?.detail || err.message || 'Giriş başarısız.');
+      if (err.response?.status === 400) {
+        setError('Bu e-posta ile hesap bulunamadı veya şifre yanlış.');
+      } else {
+        setError(err.response?.data?.detail || err.message || 'Giriş başarısız.');
+      }
     } finally {
       setLoading(false);
     }
@@ -103,8 +107,8 @@ export default function Login() {
       </form>
       <p className="mt-6 text-center text-gray-500 text-sm">
         Hesabınız yok mu?{' '}
-        <Link to="/" className="text-indigo-600 font-semibold">
-          Mağazaya dön
+        <Link to="/register" className="text-indigo-600 font-semibold">
+          Kayıt Ol
         </Link>
       </p>
     </div>

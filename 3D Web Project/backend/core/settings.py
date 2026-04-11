@@ -99,12 +99,15 @@ SESSION_COOKIE_AGE = 60 * 60 * 24 * 30
 
 # Email Odaklı Giriş Ayarları
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
-ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='optional')
-ACCOUNT_LOGIN_METHODS = ['email']
+ACCOUNT_EMAIL_VERIFICATION = config('ACCOUNT_EMAIL_VERIFICATION', default='none')
+ACCOUNT_LOGIN_METHODS = {'email'}
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
+
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'
+)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
 
 
 MIDDLEWARE = [
@@ -150,6 +153,10 @@ SOCIALACCOUNT_PROVIDERS = {
 # Çakışmaları önlemek için ek ayarlar
 SOCIALACCOUNT_AUTO_SIGNUP = True  # Kullanıcı yoksa otomatik oluştur
 SOCIALACCOUNT_LOGIN_ON_GET = False
+
+# Custom adapters
+SOCIALACCOUNT_ADAPTER = 'core.adapters.CustomSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'core.adapters.CustomAccountAdapter'
 
 ROOT_URLCONF = 'core.urls'
 
@@ -227,7 +234,7 @@ ACCOUNT_SESSION_REMEMBER = True
 SESSION_COOKIE_AGE = 2592000 # 30 gün (saniye)
 
 # Sosyal hesapla giriş yapıldığında otomatik kayıt ve giriş
-SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'core.adapters.CustomSocialAccountAdapter'
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -256,7 +263,7 @@ LOGOUT_REDIRECT_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # Eğer allauth profil sayfasına gitmeye zorlarsa bunu kapatıyoruz
 ACCOUNT_ADAPTER = 'allauth.account.adapter.DefaultAccountAdapter'
-SOCIALACCOUNT_ADAPTER = 'allauth.socialaccount.adapter.DefaultSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'core.adapters.CustomSocialAccountAdapter'
 
 SOCIALACCOUNT_STORE_TOKENS = True
 

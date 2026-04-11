@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { mediaUrl } from '../services/api';
 import { ArrowRight } from 'lucide-react';
+import { getLang } from '../utils/locale';
 
 export function ProductCardSkeleton() {
   return (
@@ -18,7 +19,9 @@ export function ProductCardSkeleton() {
 export default function ProductCard({ product }) {
   const imageSrc = product.thumbnail || product.images?.[0]?.image;
   const src = imageSrc ? mediaUrl(imageSrc) : null;
-  const displayName = product.display_name || product.name_tr || product.name_en;
+  const lang = getLang();
+  const displayName = product.display_name || (lang === 'tr' ? product.name_tr : product.name_en) || product.name_tr || product.name_en;
+  const subtitle = lang === 'tr' ? product.name_tr || product.name_en : product.name_en || product.name_tr;
   const has3d = !!product.model_3d;
 
   return (
@@ -43,7 +46,7 @@ export default function ProductCard({ product }) {
       <div className="p-5 space-y-4">
         <div className="space-y-2">
           <h2 className="text-xl font-black text-slate-900 leading-tight">{displayName}</h2>
-          <p className="text-sm text-slate-500 line-clamp-2">{product.name_en || product.name_tr}</p>
+          <p className="text-sm text-slate-500 line-clamp-2">{subtitle}</p>
         </div>
 
         <div className="flex items-center justify-between gap-4">

@@ -12,6 +12,7 @@ User = get_user_model()
 class Category(models.Model):
     name_tr = models.CharField(max_length=100)
     name_en = models.CharField(max_length=100)
+    name_de = models.CharField(max_length=100, blank=True, null=True)
     slug = models.SlugField(unique=True)
 
     def __str__(self):
@@ -63,8 +64,10 @@ class Product(models.Model):
     slug = models.SlugField(unique=True)
     name_tr = models.CharField(max_length=200)
     name_en = models.CharField(max_length=200)
+    name_de = models.CharField(max_length=200, blank=True, null=True)
     description_tr = models.TextField()
     description_en = models.TextField()
+    description_de = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)  # Baz fiyat
     currency = models.CharField(max_length=5, default="EUR")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
@@ -215,9 +218,14 @@ class Cart(models.Model):
 class Order(models.Model):
     STATUS_CHOICES = (
         ('pending', 'Beklemede'),
+        ('processing', 'İşleme Alındı'),
         ('paid', 'Ödendi'),
         ('shipped', 'Kargoda'),
         ('delivered', 'Teslim Edildi'),
+        ('return_request', 'İade Talebi'),
+        ('return_accepted', 'İade Kabul Edildi'),
+        ('returned', 'İade Tamamlandı'),
+        ('refunded', 'Para İadesi Yapıldı'),
         ('cancelled', 'İptal'),
     )
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='orders')

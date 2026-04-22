@@ -41,7 +41,7 @@ class ProductAdmin(admin.ModelAdmin):
     inlines = [ProductSizeInline, ProductColorInline, ProductImageInline]
     prepopulated_fields = {"slug": ("name_en",)}
     fields = (
-        'slug', 'name_tr', 'name_en', 'description_tr', 'description_en',
+        'slug', 'name_tr', 'name_en', 'name_de', 'description_tr', 'description_en', 'description_de',
         'price', 'currency', 'category', 'thumbnail', 'model_3d', 'model_3d_poster',
         'is_visible', 'is_available', 'low_stock_warning',
     )
@@ -83,6 +83,8 @@ class OrderItemInline(admin.TabularInline):
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'status', 'total', 'created_at')
-    list_filter = ('status',)
+    list_filter = ('status', 'created_at')
+    list_editable = ('status',)
     inlines = [OrderItemInline]
-    readonly_fields = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at', 'total')
+    fields = ('user', 'status', 'total', 'coupon', 'created_at', 'updated_at')

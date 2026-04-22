@@ -36,8 +36,9 @@ class ProductListSerializer(serializers.ModelSerializer):
 
     def get_display_name(self, obj):
         request = self.context.get('request')
-        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
-        return obj.name_tr if lang.startswith('tr') else obj.name_en
+        lang = (request.headers.get('Accept-Language', '') if request else 'en').lower()
+        base_lang = lang.split('-')[0].split(',')[0]
+        return getattr(obj, f'name_{base_lang}', None) or getattr(obj, 'name_en', None) or getattr(obj, 'name_tr', None)
 
 
 class ProductDetailSerializer(serializers.ModelSerializer):
@@ -58,13 +59,15 @@ class ProductDetailSerializer(serializers.ModelSerializer):
 
     def get_display_name(self, obj):
         request = self.context.get('request')
-        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
-        return obj.name_tr if lang.startswith('tr') else obj.name_en
+        lang = (request.headers.get('Accept-Language', '') if request else 'en').lower()
+        base_lang = lang.split('-')[0].split(',')[0]
+        return getattr(obj, f'name_{base_lang}', None) or getattr(obj, 'name_en', None) or getattr(obj, 'name_tr', None)
 
     def get_display_description(self, obj):
         request = self.context.get('request')
-        lang = (request.headers.get('Accept-Language', '') if request else '').lower()
-        return obj.description_tr if lang.startswith('tr') else obj.description_en
+        lang = (request.headers.get('Accept-Language', '') if request else 'en').lower()
+        base_lang = lang.split('-')[0].split(',')[0]
+        return getattr(obj, f'description_{base_lang}', None) or getattr(obj, 'description_en', None) or getattr(obj, 'description_tr', None)
 
 # --- SEPET SERIALIZERS (SIRALAMA ÖNEMLİ) ---
 
@@ -94,9 +97,17 @@ class CartSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
+    display_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ['id', 'name_tr', 'name_en', 'slug']
+        fields = ['id', 'name_tr', 'name_en', 'slug', 'display_name']
+
+    def get_display_name(self, obj):
+        request = self.context.get('request')
+        lang = (request.headers.get('Accept-Language', '') if request else 'en').lower()
+        base_lang = lang.split('-')[0].split(',')[0]
+        return getattr(obj, f'name_{base_lang}', None) or getattr(obj, 'name_en', None) or getattr(obj, 'name_tr', None)
 
 
 # --- SİPARİŞ SERIALIZERS ---

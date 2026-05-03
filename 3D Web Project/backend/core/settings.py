@@ -158,6 +158,7 @@ SOCIALACCOUNT_LOGIN_ON_GET = False
 SOCIALACCOUNT_ADAPTER = 'core.adapters.CustomSocialAccountAdapter'
 ACCOUNT_ADAPTER = 'core.adapters.CustomAccountAdapter'
 
+
 ROOT_URLCONF = 'core.urls'
 
 

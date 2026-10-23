@@ -42,3 +42,14 @@ yarn-error.log*
 # Coverage
 coverage/
 .nyc_output/
+
+# Local database
+*.sqlite3
+db.sqlite3
+
+# Python virtual environments
+.venv/
+venv/
+
+# Local environment files
+.env

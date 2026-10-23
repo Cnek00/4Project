@@ -40,7 +40,14 @@ export default function Home() {
       })
       .catch(() => setProducts([]))
       .finally(() => setLoading(false));
-  }, [selectedCategory, search]);
+  // The language is used by the API interceptor (Accept-Language), so the
+  // callback must be recreated when it changes even though it is not read here.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategory, search, i18n.language]);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   useEffect(() => {
     getCategories()
@@ -49,18 +56,6 @@ export default function Home() {
         setCategories(Array.isArray(list) ? list : []);
       })
       .catch(() => setCategories([]));
-  }, []);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    fetchProducts();
-    getCategories().then((data) => {
-      const list = data?.results ?? data ?? [];
-      setCategories(Array.isArray(list) ? list : []);
-    }).catch(() => setCategories([]));
   }, [i18n.language]);
 
   const handleSearch = (event) => {
@@ -92,7 +87,7 @@ export default function Home() {
             {t('home.title')} <span className="text-indigo-600 dark:text-cyan-400">{t('home.subtitle')}</span>.
           </motion.h1>
           <motion.p variants={itemVariants} className="text-slate-600 dark:text-slate-300 text-lg leading-8">
-            {t('home.subtitle')}
+            {t('home.description')}
           </motion.p>
           <motion.div variants={itemVariants} className="mt-8 flex flex-wrap gap-3">
             <button

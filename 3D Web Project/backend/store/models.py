@@ -1,8 +1,8 @@
-from django.db import models
+
 from django.contrib.auth import get_user_model
-from django.utils import timezone
-from datetime import timedelta
 from django.core.validators import FileExtensionValidator, MinValueValidator
+from django.db import models
+from django.utils import timezone
 
 User = get_user_model()
 

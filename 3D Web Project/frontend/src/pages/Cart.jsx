@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -22,7 +22,7 @@ export default function Cart() {
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [orderDone, setOrderDone] = useState(null);
 
-  const loadCart = () => {
+  const loadCart = useCallback(() => {
     if (!isAuthenticated) {
       setCart({ items: [] });
       setLoading(false);
@@ -32,11 +32,11 @@ export default function Cart() {
       .then((data) => setCart(data))
       .catch(() => setCart({ items: [] }))
       .finally(() => setLoading(false));
-  };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     loadCart();
-  }, [isAuthenticated]);
+  }, [loadCart]);
 
   const handleUpdateQty = (itemId, newQty) => {
     if (newQty < 1) return;

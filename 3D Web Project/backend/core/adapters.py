@@ -2,10 +2,11 @@
 Custom allauth adapter to fix MultipleObjectsReturned error
 that occurs due to M2M relationships with Django Sites
 """
-from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.socialaccount.models import SocialApp
 import uuid
+
+from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.socialaccount.models import SocialApp
 
 
 class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):

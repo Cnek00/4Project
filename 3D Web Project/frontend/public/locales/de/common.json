@@ -1,0 +1,92 @@
+{
+  "common": {
+    "shop": "Shop",
+    "about": "Über uns",
+    "cart": "Warenkorb",
+    "orders": "Bestellungen",
+    "theme": "Design",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "login": "Anmelden",
+    "logout": "Abmelden",
+    "register": "Registrieren",
+    "loading": "Wird geladen...",
+    "search": "Produkte suchen",
+    "allRightsReserved": "Alle Rechte vorbehalten.",
+    "designAndDev": "Design & Entwicklung"
+  },
+  "home": {
+    "title": "Sieh es, bevor",
+    "subtitle": "du kaufst",
+    "categories": "Kategorien",
+    "clearFilters": "Filter zurücksetzen",
+    "noProducts": "Keine Produkte gefunden",
+    "noProductsDesc": "Versuche eine andere Kategorie oder Suche.",
+    "description": "Betrachte jedes Detail in realistischen 3D-Modellen. Sieh Farbe und Form, bevor du dich entscheidest.",
+    "tagline": "Sieh es, bevor du kaufst."
+  },
+  "product": {
+    "backToShop": "Zurück zum Shop",
+    "images": "Bilder",
+    "view3D": "In 3D ansehen",
+    "inspect": "Produkt in 360° ansehen",
+    "description": "Produktbeschreibung",
+    "selectSize": "Bitte wähle eine Größe.",
+    "selectColor": "Farbe wählen",
+    "quantity": "Menge",
+    "inStock": "Auf Lager",
+    "addToCart": "In den Warenkorb",
+    "addedToCart": "Zum Warenkorb hinzugefügt.",
+    "addError": "Produkt konnte nicht hinzugefügt werden.",
+    "loginToAdd": "Melde dich an, um den Artikel hinzuzufügen.",
+    "price": "Preis",
+    "original": "Original",
+    "noImage": "Kein Bild",
+    "size": "Größe",
+    "fastShipping": "Schneller Versand"
+  },
+  "cart": {
+    "title": "Dein Warenkorb",
+    "empty": "Dein Warenkorb ist leer.",
+    "continue": "Weiter einkaufen",
+    "remove": "Entfernen",
+    "total": "Gesamt",
+    "coupon": "Gutscheincode",
+    "applyCoupon": "Anwenden",
+    "couponApplied": "Gutschein angewendet.",
+    "couponInvalid": "Ungültiger Gutschein.",
+    "checkout": "Bestellung abschließen"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "login": "Anmelden",
+    "haveAccount": "Du hast bereits ein Konto?",
+    "noAccount": "Noch kein Konto?",
+    "loginGoogle": "Mit Google anmelden",
+    "signUpGoogle": "Mit Google registrieren"
+  },
+  "orders": {
+    "orderId": "Bestellung",
+    "empty": "Du hast noch keine Bestellungen.",
+    "pending": "Ausstehend",
+    "processing": "In Bearbeitung",
+    "paid": "Bezahlt",
+    "shipped": "Versendet",
+    "delivered": "Zugestellt",
+    "returnRequest": "Rücksendung angefragt",
+    "returnAccepted": "Rücksendung akzeptiert",
+    "returned": "Zurückgesendet",
+    "refunded": "Erstattet",
+    "cancelled": "Storniert"
+  },
+  "about": {
+    "badge": "3D-Einkaufserlebnis",
+    "title": "Sieh es, bevor du kaufst.",
+    "description": "3D Store ermöglicht es dir, Produkte vor dem Kauf auf deinem eigenen Bildschirm in 360° zu betrachten. Realistische Modelle, scharfe Bilder und sichere Zahlung machen den Einkauf einen Schritt besser.",
+    "cta": "Kollektion entdecken",
+    "mBadge": "Unsere Mission",
+    "mission": "Ein Produkt ist mehr als ein einzelnes Foto. Betrachte Farbe, Form und Details in 3D, bevor du dich entscheidest."
+  }
+}

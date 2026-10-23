@@ -212,3 +212,6 @@ backend/staticfiles/
 
 # Logs
 *.log
+# Keep the SPA public assets (translations, favicon)
+!frontend/public/
+!frontend/public/**

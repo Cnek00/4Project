@@ -12,7 +12,7 @@ export default function Footer() {
           <div>
             <p className="text-base font-black text-slate-900 dark:text-white">3D Shop</p>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 max-w-xl">
-              {t('home.subtitle')}
+              {t('home.tagline')}
             </p>
           </div>
 

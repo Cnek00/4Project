@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getProductDetail, addToCartWithColor, addToCart, mediaUrl } from '../services/api';
@@ -20,22 +20,26 @@ export default function ProductDetail() {
   const [selectedColorId, setSelectedColorId] = useState(null);
   const [show3d, setShow3d] = useState(false);
 
-  const loadProduct = () => {
+  const loadProduct = useCallback(() => {
     getProductDetail(id)
       .then((data) => {
         setProduct(data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    loadProduct();
   }, [id]);
 
   useEffect(() => {
     loadProduct();
-  }, [i18n.language]);
+  }, [loadProduct]);
+
+  useEffect(() => {
+    loadProduct();
+  }, [i18n.language, loadProduct]);
+
+  useEffect(() => {
+    if (product?.model_3d) setShow3d(true);
+  }, [product]);
 
   if (loading) return <div className="text-center py-20 font-bold">{t('common.loading')}</div>;
   if (!product) return <div className="text-center py-20 font-bold">{t('product.description')}</div>;

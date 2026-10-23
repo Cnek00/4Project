@@ -1,0 +1,92 @@
+{
+  "common": {
+    "shop": "Shop",
+    "about": "About",
+    "cart": "Cart",
+    "orders": "Orders",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "register": "Sign up",
+    "loading": "Loading...",
+    "search": "Search products",
+    "allRightsReserved": "All rights reserved.",
+    "designAndDev": "Design & Development"
+  },
+  "home": {
+    "title": "See it before",
+    "subtitle": "you buy",
+    "categories": "Categories",
+    "clearFilters": "Clear filters",
+    "noProducts": "No products found",
+    "noProductsDesc": "Try another category or search term.",
+    "description": "Inspect every angle with realistic 3D models. See the colour and details before you decide.",
+    "tagline": "See it before you buy."
+  },
+  "product": {
+    "backToShop": "Back to shop",
+    "images": "Images",
+    "view3D": "View in 3D",
+    "inspect": "Inspect the product in 360°",
+    "description": "Product description",
+    "selectSize": "Please select a size.",
+    "selectColor": "Select a colour",
+    "quantity": "Quantity",
+    "inStock": "In stock",
+    "addToCart": "Add to cart",
+    "addedToCart": "Added to your cart.",
+    "addError": "Could not add the product.",
+    "loginToAdd": "Sign in to add this item to your cart.",
+    "price": "Price",
+    "original": "Original",
+    "noImage": "No image",
+    "size": "Size",
+    "fastShipping": "Fast shipping"
+  },
+  "cart": {
+    "title": "Your cart",
+    "empty": "Your cart is empty.",
+    "continue": "Continue shopping",
+    "remove": "Remove",
+    "total": "Total",
+    "coupon": "Coupon code",
+    "applyCoupon": "Apply",
+    "couponApplied": "Coupon applied.",
+    "couponInvalid": "Invalid coupon.",
+    "checkout": "Complete order"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "login": "Sign in",
+    "haveAccount": "Already have an account?",
+    "noAccount": "Don't have an account?",
+    "loginGoogle": "Sign in with Google",
+    "signUpGoogle": "Sign up with Google"
+  },
+  "orders": {
+    "orderId": "Order",
+    "empty": "You have no orders yet.",
+    "pending": "Pending",
+    "processing": "Processing",
+    "paid": "Paid",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "returnRequest": "Return requested",
+    "returnAccepted": "Return accepted",
+    "returned": "Returned",
+    "refunded": "Refunded",
+    "cancelled": "Cancelled"
+  },
+  "about": {
+    "badge": "3D shopping experience",
+    "title": "See it before you buy.",
+    "description": "3D Store lets you inspect products in 360° on your own screen before purchasing. Realistic models, sharp imagery and secure checkout take shopping one step further.",
+    "cta": "Explore the collection",
+    "mBadge": "Our mission",
+    "mission": "We believe a product is more than a single photo. Preview its colour, shape and details in 3D before you decide."
+  }
+}

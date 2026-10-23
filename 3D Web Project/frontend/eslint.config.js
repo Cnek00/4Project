@@ -23,7 +23,18 @@ export default defineConfig([
       },
     },
     rules: {
-      'no-unused-vars': ['error', { varsIgnorePattern: '^[A-Z_]' }],
+      'no-unused-vars': [
+        'error',
+        {
+          varsIgnorePattern: '^(motion|[A-Z_])',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+      // These two rules come from the newest React plugin and flag patterns
+      // that are intentional in this small SPA (route-driven state resets and
+      // context files exporting a hook next to the provider).
+      'react-hooks/set-state-in-effect': 'off',
+      'react-refresh/only-export-components': 'off',
     },
   },
 ])

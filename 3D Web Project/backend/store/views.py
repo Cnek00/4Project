@@ -1,23 +1,40 @@
-from rest_framework import generics, viewsets, status
+import logging
+from collections import defaultdict
+
+from django.db import transaction
+from django.db.models import F
+from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from django.db import transaction
-from django.db.models import F
 
-from .models import Product, Category, Cart, CartItem, ProductSize, Coupon, Order, OrderItem
+from .models import (
+    Cart,
+    CartItem,
+    Category,
+    Coupon,
+    Order,
+    OrderItem,
+    Product,
+    ProductColor,
+    ProductSize,
+)
 from .serializers import (
-    ProductListSerializer, ProductDetailSerializer, CartSerializer, CategorySerializer,
+    CartSerializer,
+    CategorySerializer,
     OrderSerializer,
+    ProductDetailSerializer,
+    ProductListSerializer,
 )
 
+logger = logging.getLogger(__name__)
 
 # --- ÜRÜN VE KATEGORİ VİEWLARI ---
 
 class CategoryListView(generics.ListAPIView):
     """Kategorileri listeler"""
-    queryset = Category.objects.all()
+    queryset = Category.objects.order_by('name_en')
     serializer_class = CategorySerializer
 
 
@@ -30,7 +47,7 @@ class ProductListView(generics.ListAPIView):
     def get_queryset(self):
         qs = Product.objects.filter(is_visible=True).select_related('category').prefetch_related(
             'sizes', 'colors', 'images'
-        )
+        ).order_by('-created_at', '-id')
         category_id = self.request.query_params.get('category')
         if category_id:
             qs = qs.filter(category_id=category_id)
@@ -104,11 +121,22 @@ class CartViewSet(viewsets.ModelViewSet):
                 return Response({"error": f"Yetersiz stok. Mevcut: {size.stock}"}, status=400)
 
             cart, _ = Cart.objects.get_or_create(user=request.user, is_completed=False)
-            item = cart.add_item(product=product, size=size, color=color, quantity=quantity)
+            existing = CartItem.objects.filter(
+                cart=cart, product=product, size=size, color=color
+            ).first()
+            requested_total = quantity + (existing.quantity if existing else 0)
+            if requested_total > size.stock:
+                return Response(
+                    {"error": f"Yetersiz stok. Mevcut: {size.stock}"},
+                    status=400,
+                )
+
+            cart.add_item(product=product, size=size, color=color, quantity=quantity)
 
             return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
+        except Exception:
+            logger.exception("Could not add product %s to the cart", product_id)
+            return Response({"error": "Ürün sepete eklenemedi."}, status=400)
 
     @action(detail=False, methods=['post'])
     def merge_cart(self, request):
@@ -137,7 +165,7 @@ class CartViewSet(viewsets.ModelViewSet):
 
                 if size.stock >= quantity:
                     cart.add_item(product=product, size=size, color=color, quantity=quantity)
-            except:
+            except (KeyError, TypeError, ValueError, Product.DoesNotExist, ProductSize.DoesNotExist, ProductColor.DoesNotExist):
                 continue
 
         return Response(CartSerializer(cart).data, status=200)
@@ -202,24 +230,52 @@ class CartViewSet(viewsets.ModelViewSet):
             return Response({"error": "Sepetiniz boş."}, status=400)
 
         with transaction.atomic():
-            # Stok kilitle
-            size_ids = list(cart.items.values_list('size_id', flat=True))
-            sizes = ProductSize.objects.select_for_update().filter(id__in=size_ids).select_related('product')
+            # Lock the cart row so the same cart cannot be checked out twice.
+            cart = (
+                Cart.objects.select_for_update()
+                .prefetch_related('items__product', 'items__size', 'items__color')
+                .filter(user=request.user, is_completed=False)
+                .first()
+            )
+            if not cart or not cart.items.exists():
+                return Response({"error": "Sepetiniz boş."}, status=400)
+
+            items = list(cart.items.all())
+
+            # A size can appear in more than one cart line (e.g. different colours),
+            # so validate the total quantity per size instead of each line separately.
+            quantities = defaultdict(int)
+            for item in items:
+                quantities[item.size_id] += item.quantity
+
+            sizes = (
+                ProductSize.objects.select_for_update()
+                .filter(id__in=quantities.keys())
+                .select_related('product')
+            )
             size_map = {s.id: s for s in sizes}
 
-            for item in cart.items.all():
-                size = size_map.get(item.size_id)
+            for size_id, quantity in quantities.items():
+                size = size_map.get(size_id)
                 if not size:
                     return Response({"error": "Beden bulunamadı."}, status=400)
                 if not size.product.is_available or not size.product.is_visible:
                     return Response({"error": "Ürün satışta değil."}, status=400)
-                if size.stock < item.quantity:
+                if size.stock < quantity:
                     return Response({"error": f"Yetersiz stok. Mevcut: {size.stock}"}, status=400)
+
+            # Lock the coupon as well; otherwise two concurrent checkouts can both
+            # pass is_valid() and exceed usage_limit.
+            locked_coupon = None
+            if cart.coupon_id:
+                locked_coupon = Coupon.objects.select_for_update().get(pk=cart.coupon_id)
+                if not locked_coupon.is_valid():
+                    return Response({"error": "Kupon artık geçerli değil."}, status=400)
 
             total = cart.total_price
             order = Order.objects.create(user=request.user, total=total, coupon=cart.coupon, status='pending')
 
-            for item in cart.items.all():
+            for item in items:
                 size = size_map[item.size_id]
                 OrderItem.objects.create(
                     order=order,
@@ -229,14 +285,16 @@ class CartViewSet(viewsets.ModelViewSet):
                     price=size.current_price,
                     quantity=item.quantity,
                 )
-                ProductSize.objects.filter(id=size.id).update(stock=F('stock') - item.quantity)
 
-            if cart.coupon and cart.coupon.is_valid():
-                cart.coupon.used_count = F('used_count') + 1
-                cart.coupon.save()
+            for size_id, quantity in quantities.items():
+                ProductSize.objects.filter(id=size_id).update(stock=F('stock') - quantity)
+
+            if locked_coupon:
+                locked_coupon.used_count += 1
+                locked_coupon.save(update_fields=['used_count'])
 
             cart.is_completed = True
-            cart.save()
+            cart.save(update_fields=['is_completed'])
 
         order = Order.objects.prefetch_related('items').get(pk=order.pk)
         return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)

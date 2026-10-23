@@ -1,8 +1,9 @@
 import json
 import os
+
 from django.core.management.base import BaseCommand
-from django.utils.text import slugify
-from store.models import Category, Product, ProductSize, ProductColor
+
+from store.models import Category, Product, ProductColor, ProductSize
 
 
 class Command(BaseCommand):
@@ -88,11 +89,26 @@ class Command(BaseCommand):
                             'price': prod_data.get('price', '0'),
                             'currency': prod_data.get('currency', 'EUR'),
                             'category': category,
+                            'thumbnail': prod_data.get('thumbnail', ''),
+                            'model_3d': prod_data.get('model_3d') or None,
+                            'model_3d_poster': prod_data.get('model_3d_poster') or None,
                             'is_visible': prod_data.get('is_visible', True),
                             'is_available': prod_data.get('is_available', True),
                             'low_stock_warning': prod_data.get('low_stock_warning', 5),
                         }
                     )
+
+                    if not created:
+                        # Keep an existing demo database in sync with the fixture.
+                        for field in (
+                            'thumbnail', 'model_3d', 'model_3d_poster',
+                            'price', 'currency', 'name_tr', 'name_en',
+                            'description_tr', 'description_en',
+                        ):
+                            value = prod_data.get(field)
+                            if value is not None:
+                                setattr(product, field, value)
+                        product.save()
                     
                     if created:
                         products_loaded += 1

@@ -2,9 +2,9 @@
 Google Allauth girişinden sonra JWT üretip frontend'e yönlendirir.
 Böylece SPA (React) tarafında token'lar localStorage'a yazılabilir.
 """
-from django.shortcuts import redirect
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
 from rest_framework_simplejwt.tokens import RefreshToken
 
 

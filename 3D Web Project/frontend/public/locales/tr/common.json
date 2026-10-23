@@ -1,0 +1,92 @@
+{
+  "common": {
+    "shop": "Mağaza",
+    "about": "Hakkımızda",
+    "cart": "Sepet",
+    "orders": "Siparişler",
+    "theme": "Tema",
+    "light": "Aydınlık",
+    "dark": "Karanlık",
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "register": "Kayıt Ol",
+    "loading": "Yükleniyor...",
+    "search": "Ürün ara",
+    "allRightsReserved": "Tüm hakları saklıdır.",
+    "designAndDev": "Tasarım & Geliştirme"
+  },
+  "home": {
+    "title": "Ürünü almadan önce",
+    "subtitle": "gör",
+    "categories": "Kategoriler",
+    "clearFilters": "Filtreleri temizle",
+    "noProducts": "Ürün bulunamadı",
+    "noProductsDesc": "Farklı bir kategori veya arama deneyin.",
+    "description": "Gerçekçi 3D modellerle ürünü her açıdan inceleyin, rengini ve detaylarını karar vermeden önce görün.",
+    "tagline": "Ürünü almadan önce gör."
+  },
+  "product": {
+    "backToShop": "Mağazaya dön",
+    "images": "Görseller",
+    "view3D": "3D Görüntüle",
+    "inspect": "Ürünü 360° incele",
+    "description": "Ürün açıklaması",
+    "selectSize": "Lütfen bir beden seçin.",
+    "selectColor": "Renk seçin",
+    "quantity": "Adet",
+    "inStock": "Stokta",
+    "addToCart": "Sepete Ekle",
+    "addedToCart": "Ürün sepete eklendi.",
+    "addError": "Ürün sepete eklenemedi.",
+    "loginToAdd": "Sepete eklemek için giriş yapın.",
+    "price": "Fiyat",
+    "original": "Orijinal",
+    "noImage": "Görsel yok",
+    "size": "Beden",
+    "fastShipping": "Hızlı kargo"
+  },
+  "cart": {
+    "title": "Sepetim",
+    "empty": "Sepetiniz boş.",
+    "continue": "Alışverişe devam et",
+    "remove": "Kaldır",
+    "total": "Toplam",
+    "coupon": "Kupon kodu",
+    "applyCoupon": "Uygula",
+    "couponApplied": "Kupon uygulandı.",
+    "couponInvalid": "Kupon geçersiz.",
+    "checkout": "Siparişi tamamla"
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "confirmPassword": "Şifre tekrar",
+    "login": "Giriş Yap",
+    "haveAccount": "Hesabınız var mı?",
+    "noAccount": "Hesabınız yok mu?",
+    "loginGoogle": "Google ile giriş yap",
+    "signUpGoogle": "Google ile kayıt ol"
+  },
+  "orders": {
+    "orderId": "Sipariş",
+    "empty": "Henüz siparişiniz yok.",
+    "pending": "Beklemede",
+    "processing": "İşleme alındı",
+    "paid": "Ödendi",
+    "shipped": "Kargoda",
+    "delivered": "Teslim edildi",
+    "returnRequest": "İade talebi",
+    "returnAccepted": "İade kabul edildi",
+    "returned": "İade edildi",
+    "refunded": "Para iadesi yapıldı",
+    "cancelled": "İptal edildi"
+  },
+  "about": {
+    "badge": "3D alışveriş deneyimi",
+    "title": "Ürünü almadan önce gör.",
+    "description": "3D Store, ürünleri satın almadan önce kendi ekranınızda 360 derece incelemenizi sağlar. Gerçekçi modeller, net görseller ve güvenli ödeme ile alışverişi bir adım öteye taşır.",
+    "cta": "Koleksiyonu keşfet",
+    "mBadge": "Misyonumuz",
+    "mission": "Her ürünün yalnızca bir fotoğraftan ibaret olmadığını düşünüyoruz. 3D önizleme ile rengi, formu ve detayları karar vermeden önce görün."
+  }
+}

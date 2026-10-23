@@ -1,6 +1,16 @@
 from rest_framework import serializers
-from .models import Product, ProductSize, ProductColor, ProductImage, Cart, CartItem, Category, Order, OrderItem
 
+from .models import (
+    Cart,
+    CartItem,
+    Category,
+    Order,
+    OrderItem,
+    Product,
+    ProductColor,
+    ProductImage,
+    ProductSize,
+)
 
 # --- ÜRÜN SERIALIZERS ---
 

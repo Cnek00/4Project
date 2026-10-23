@@ -53,3 +53,6 @@ venv/
 
 # Local environment files
 .env
+
+# Django collected static files
+staticfiles/

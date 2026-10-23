@@ -1,7 +1,21 @@
 from django.contrib import admin
-from django.shortcuts import render
 from django.http import HttpResponseRedirect
-from .models import Category, Product, ProductColor, ProductSize, ProductImage, Review, Cart, CartItem, Order, OrderItem, Coupon, Campaign
+from django.shortcuts import render
+
+from .models import (
+    Campaign,
+    Cart,
+    CartItem,
+    Category,
+    Coupon,
+    Order,
+    OrderItem,
+    Product,
+    ProductColor,
+    ProductImage,
+    ProductSize,
+    Review,
+)
 
 
 # --- AKSİYON: Toplu Fiyat Güncelleme ---

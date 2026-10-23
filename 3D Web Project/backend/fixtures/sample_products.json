@@ -29,7 +29,7 @@
       "price": "899.99",
       "currency": "EUR",
       "category_slug": "shoes",
-      "thumbnail": "Nike_Air_Max_90_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_sneaker.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 5,
@@ -83,7 +83,9 @@
           "name": "Red",
           "hex_code": "#FF0000"
         }
-      ]
+      ],
+      "model_3d": "products/models/MaterialsVariantsShoe.glb",
+      "model_3d_poster": "products/thumbnails/demo_sneaker.jpg"
     },
     {
       "slug": "adidas-ultraboost-22",
@@ -94,7 +96,7 @@
       "price": "799.99",
       "currency": "EUR",
       "category_slug": "shoes",
-      "thumbnail": "Adidas_Ultraboost_22_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_running_shoe.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 5,
@@ -143,7 +145,9 @@
           "name": "Gray",
           "hex_code": "#808080"
         }
-      ]
+      ],
+      "model_3d": null,
+      "model_3d_poster": null
     },
     {
       "slug": "cotton-t-shirt",
@@ -154,7 +158,7 @@
       "price": "79.99",
       "currency": "EUR",
       "category_slug": "clothing",
-      "thumbnail": "Cotton_TShirt_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_tshirt.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 10,
@@ -213,7 +217,9 @@
           "name": "Gray",
           "hex_code": "#808080"
         }
-      ]
+      ],
+      "model_3d": null,
+      "model_3d_poster": null
     },
     {
       "slug": "denim-jacket",
@@ -224,7 +230,7 @@
       "price": "199.99",
       "currency": "EUR",
       "category_slug": "clothing",
-      "thumbnail": "Denim_Jacket_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_jacket.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 5,
@@ -273,7 +279,9 @@
           "name": "Black",
           "hex_code": "#000000"
         }
-      ]
+      ],
+      "model_3d": null,
+      "model_3d_poster": null
     },
     {
       "slug": "leather-backpack",
@@ -284,7 +292,7 @@
       "price": "449.99",
       "currency": "EUR",
       "category_slug": "accessories",
-      "thumbnail": "Leather_Backpack_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_backpack.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 3,
@@ -309,7 +317,9 @@
           "name": "Tan",
           "hex_code": "#D2B48C"
         }
-      ]
+      ],
+      "model_3d": null,
+      "model_3d_poster": null
     },
     {
       "slug": "stainless-watch",
@@ -320,7 +330,7 @@
       "price": "279.99",
       "currency": "EUR",
       "category_slug": "accessories",
-      "thumbnail": "Stainless_Watch_thumb.jpg",
+      "thumbnail": "products/thumbnails/demo_watch.jpg",
       "is_visible": true,
       "is_available": true,
       "low_stock_warning": 2,
@@ -345,7 +355,9 @@
           "name": "Rose Gold",
           "hex_code": "#B76E79"
         }
-      ]
+      ],
+      "model_3d": null,
+      "model_3d_poster": null
     }
   ]
 }
